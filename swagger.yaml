@@ -1,699 +1,1481 @@
-swagger: "2.0"
+openapi: 3.0.0
+x-api-id: dapi
 info:
-  description: "This is a sample server Petstore server.  You can find out more about     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).      For this sample, you can use the api key `special-key` to test the authorization     filters."
-  version: "1.0.0"
-  title: "Swagger Petstore"
-  termsOfService: "http://swagger.io/terms/"
-  contact:
-    email: "apiteam@swagger.io"
-  license:
-    name: "Apache 2.0"
-    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-host: "petstore.swagger.io"
-basePath: "/v2"
-tags:
-- name: "pet"
-  description: "Everything about your Pets"
-  externalDocs:
-    description: "Find out more"
-    url: "http://swagger.io"
-- name: "store"
-  description: "Access to Petstore orders"
-- name: "user"
-  description: "Operations about user"
-  externalDocs:
-    description: "Find out more about our store"
-    url: "http://swagger.io"
-schemes:
-- "http"
+  title: DAPI
+  version: 0.6.1
+  description: Dash Decentralized API (DAPI)
+servers:
+  - url: '{url}:{port}'
+    description: User-defined network
+    variables:
+      url:
+        default: 'http://dapi.dash.org'
+      port:
+        default: '3000'
 paths:
-  /pet:
+  /estimateFee:
     post:
+      operationId: estimateFee
+      deprecated: false
+      summary: estimateFee
+      description: Estimates the transaction fee necessary for confirmation to occur within a certain number of blocks
       tags:
-      - "pet"
-      summary: "Add a new pet to the store"
-      description: ""
-      operationId: "addPet"
-      consumes:
-      - "application/json"
-      - "application/xml"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "Pet object that needs to be added to the store"
-        required: true
-        schema:
-          $ref: "#/definitions/Pet"
+        - L1
       responses:
-        405:
-          description: "Invalid input"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-    put:
-      tags:
-      - "pet"
-      summary: "Update an existing pet"
-      description: ""
-      operationId: "updatePet"
-      consumes:
-      - "application/json"
-      - "application/xml"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "Pet object that needs to be added to the store"
-        required: true
-        schema:
-          $ref: "#/definitions/Pet"
-      responses:
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Pet not found"
-        405:
-          description: "Validation exception"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-  /pet/findByStatus:
-    get:
-      tags:
-      - "pet"
-      summary: "Finds Pets by status"
-      description: "Multiple status values can be provided with comma separated strings"
-      operationId: "findPetsByStatus"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - name: "status"
-        in: "query"
-        description: "Status values that need to be considered for filter"
-        required: true
-        type: "array"
-        items:
-          type: "string"
-          enum:
-          - "available"
-          - "pending"
-          - "sold"
-          default: "available"
-        collectionFormat: "multi"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Pet"
-        400:
-          description: "Invalid status value"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-  /pet/findByTags:
-    get:
-      tags:
-      - "pet"
-      summary: "Finds Pets by tags"
-      description: "Muliple tags can be provided with comma separated strings. Use         tag1, tag2, tag3 for testing."
-      operationId: "findPetsByTags"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - name: "tags"
-        in: "query"
-        description: "Tags to filter by"
-        required: true
-        type: "array"
-        items:
-          type: "string"
-        collectionFormat: "multi"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Pet"
-        400:
-          description: "Invalid tag value"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-      deprecated: true
-  /pet/{petId}:
-    get:
-      tags:
-      - "pet"
-      summary: "Find pet by ID"
-      description: "Returns a single pet"
-      operationId: "getPetById"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - name: "petId"
-        in: "path"
-        description: "ID of pet to return"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/Pet"
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Pet not found"
-      security:
-      - api_key: []
+        '200':
+          description: Successful response. Promise (number) containing fee in duffs per kilobyte.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: estimateFee
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - blocks
+                  properties:
+                    blocks:
+                      type: integer
+                      default: 1
+                      description: Number of blocks for fee estimate
+  /fetchContract:
     post:
+      operationId: fetchContract
+      deprecated: false
+      summary: fetchContract
+      description: Fetch a user's DAP space
       tags:
-      - "pet"
-      summary: "Updates a pet in the store with form data"
-      description: ""
-      operationId: "updatePetWithForm"
-      consumes:
-      - "application/x-www-form-urlencoded"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - name: "petId"
-        in: "path"
-        description: "ID of pet that needs to be updated"
-        required: true
-        type: "integer"
-        format: "int64"
-      - name: "name"
-        in: "formData"
-        description: "Updated name of the pet"
-        required: false
-        type: "string"
-      - name: "status"
-        in: "formData"
-        description: "Updated status of the pet"
-        required: false
-        type: "string"
+        - L2
       responses:
-        405:
-          description: "Invalid input"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-    delete:
-      tags:
-      - "pet"
-      summary: "Deletes a pet"
-      description: ""
-      operationId: "deletePet"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - name: "api_key"
-        in: "header"
-        required: false
-        type: "string"
-      - name: "petId"
-        in: "path"
-        description: "Pet id to delete"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Pet not found"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-  /pet/{petId}/uploadImage:
+        '200':
+          description: Successful response. Promise (object) with the user's dap space.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: fetchContract
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - contractId
+                  properties:
+                    contractId:
+                      type: string
+                      default: ''
+                      description: A user's DAP ID
+  /fetchDocuments:
     post:
+      operationId: fetchDocuments
+      deprecated: false
+      summary: fetchDocuments
+      description: Fetches user objects for a given condition
       tags:
-      - "pet"
-      summary: "uploads an image"
-      description: ""
-      operationId: "uploadFile"
-      consumes:
-      - "multipart/form-data"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "petId"
-        in: "path"
-        description: "ID of pet to update"
-        required: true
-        type: "integer"
-        format: "int64"
-      - name: "additionalMetadata"
-        in: "formData"
-        description: "Additional data to pass to server"
-        required: false
-        type: "string"
-      - name: "file"
-        in: "formData"
-        description: "file to upload"
-        required: false
-        type: "file"
+        - L2
       responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-  /store/inventory:
-    get:
-      tags:
-      - "store"
-      summary: "Returns pet inventories by status"
-      description: "Returns a map of status codes to quantities"
-      operationId: "getInventory"
-      produces:
-      - "application/json"
-      parameters: []
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            type: "object"
-            additionalProperties:
-              type: "integer"
-              format: "int32"
-      security:
-      - api_key: []
-  /store/order:
+        '200':
+          description: Successful response. Promise (object) with user objects.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: fetchDocuments
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - contractId
+                    - type
+                  properties:
+                    contractId:
+                      type: string
+                      default: ''
+                      description: A user's contract ID
+                    type:
+                      type: string
+                      default: ''
+                      description: DAP object type to fetch
+                    options:
+                      title: Options
+                      type: object
+                      properties:
+                        where:
+                          type: string
+                          default: ''
+                          description: Mongo-like query
+                        orderBy:
+                          type: string
+                          default: ''
+                          description: Mongo-like sort field
+                        limit:
+                          type: integer
+                          default: 100
+                          description: How many objects to fetch
+                        startAt:
+                          type: integer
+                          default: 0
+                          description: Number of objects to skip
+                        startAfter:
+                          type: integer
+                          default: 0
+                          description: Exlusive skip
+  /generate:
     post:
+      operationId: generate
+      deprecated: false
+      summary: generate
+      description: Generates blocks on demand
       tags:
-      - "store"
-      summary: "Place an order for a pet"
-      description: ""
-      operationId: "placeOrder"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "order placed for purchasing the pet"
-        required: true
-        schema:
-          $ref: "#/definitions/Order"
+        - L1
       responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/Order"
-        400:
-          description: "Invalid Order"
-  /store/order/{orderId}:
-    get:
-      tags:
-      - "store"
-      summary: "Find purchase order by ID"
-      description: "For valid response try integer IDs with value >= 1 and <= 10.         Other values will generated exceptions"
-      operationId: "getOrderById"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - name: "orderId"
-        in: "path"
-        description: "ID of pet that needs to be fetched"
-        required: true
-        type: "integer"
-        maximum: 10.0
-        minimum: 1.0
-        format: "int64"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/Order"
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Order not found"
-    delete:
-      tags:
-      - "store"
-      summary: "Delete purchase order by ID"
-      description: "For valid response try integer IDs with positive integer value.         Negative or non-integer values will generate API errors"
-      operationId: "deleteOrder"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - name: "orderId"
-        in: "path"
-        description: "ID of the order that needs to be deleted"
-        required: true
-        type: "integer"
-        minimum: 1.0
-        format: "int64"
-      responses:
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Order not found"
-  /user:
+        '200':
+          description: Successful response. Promise (string array) containing strings of block hashes.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: generate
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - amount
+                  properties:
+                    amount:
+                      type: integer
+                      default: 1
+                      description: Number of blocks to generate
+  /getAddressSummary:
     post:
+      operationId: getAddressSummary
+      deprecated: false
+      summary: getAddressSummary
+      description: Get an address summary given an address
       tags:
-      - "user"
-      summary: "Create user"
-      description: "This can only be done by the logged in user."
-      operationId: "createUser"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "Created user object"
-        required: true
-        schema:
-          $ref: "#/definitions/User"
+        - L1
       responses:
-        default:
-          description: "successful operation"
-  /user/createWithArray:
+        '200':
+          description: Successful response. Promise (object) containing summary details for the requested address.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getAddressSummary
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - address
+                  properties:
+                    address:
+                      oneOf:
+                        - type: string
+                          description: Dash address
+                        - type: array
+                          items:
+                            type: string
+                            description: Array of Dash addresses
+                    noTxList:
+                      type: boolean
+                      description: if true then no tx list is returned
+                    from:
+                      type: integer
+                      description: Start of range in the ordered list of latest UTXO
+                    to:
+                      type: integer
+                      description: End of range in the ordered list of latest UTXO
+                    fromHeight:
+                      type: integer
+                      description: Lowest block height to include
+                    toHeight:
+                      type: integer
+                      description: Block height to end on
+  /getAddressTotalReceived:
     post:
+      operationId: getAddressTotalReceived
+      deprecated: false
+      summary: getAddressTotalReceived
+      description: Get the total amount of duffs received by an address
       tags:
-      - "user"
-      summary: "Creates list of users with given input array"
-      description: ""
-      operationId: "createUsersWithArrayInput"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "List of user object"
-        required: true
-        schema:
-          type: "array"
-          items:
-            $ref: "#/definitions/User"
+        - L1
       responses:
-        default:
-          description: "successful operation"
-  /user/createWithList:
+        '200':
+          description: Successful response. Promise (number) indicating the number of duffs received by the address.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getAddressTotalReceived
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - address
+                  properties:
+                    address:
+                      type: string
+                      default: yLp6ZJueuigiF4s9E1Pv8tEunDPEsjyQfd
+                      description: Dash address
+  /getAddressTotalSent:
     post:
+      operationId: getAddressTotalSent
+      deprecated: false
+      summary: getAddressTotalSent
+      description: Get the total amount of duffs sent by an address
       tags:
-      - "user"
-      summary: "Creates list of users with given input array"
-      description: ""
-      operationId: "createUsersWithListInput"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "List of user object"
-        required: true
-        schema:
-          type: "array"
-          items:
-            $ref: "#/definitions/User"
+        - L1
       responses:
-        default:
-          description: "successful operation"
-  /user/login:
-    get:
+        '200':
+          description: Successful response. Promise (number) indicating the number of duffs sent by the address.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getAddressTotalSent
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - address
+                  properties:
+                    address:
+                      type: string
+                      default: yLp6ZJueuigiF4s9E1Pv8tEunDPEsjyQfd
+                      description: Dash address
+  /getAddressUnconfirmedBalance:
+    post:
+      operationId: getAddressUnconfirmedBalance
+      deprecated: false
+      summary: getAddressUnconfirmedBalance
+      description: Get the total unconfirmed balance for the address
       tags:
-      - "user"
-      summary: "Logs user into the system"
-      description: ""
-      operationId: "loginUser"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - name: "username"
-        in: "query"
-        description: "The user name for login"
-        required: true
-        type: "string"
-      - name: "password"
-        in: "query"
-        description: "The password for login in clear text"
-        required: true
-        type: "string"
+        - L1
       responses:
-        200:
-          description: "successful operation"
-          schema:
-            type: "string"
-          headers:
-            X-Rate-Limit:
-              type: "integer"
-              format: "int32"
-              description: "calls per hour allowed by the user"
-            X-Expires-After:
-              type: "string"
-              format: "date-time"
-              description: "date in UTC when token expires"
-        400:
-          description: "Invalid username/password supplied"
-  /user/logout:
-    get:
+        '200':
+          description: Successful response. Promise (number) indicating the number of unconfirmed duffs for the address.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getAddressUnconfirmedBalance
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - address
+                  properties:
+                    address:
+                      type: string
+                      default: yLp6ZJueuigiF4s9E1Pv8tEunDPEsjyQfd
+                      description: Dash address
+  /getBalance:
+    post:
+      operationId: getBalance
+      deprecated: false
+      summary: getBalance
+      description: Get the calculated balance for the address
       tags:
-      - "user"
-      summary: "Logs out current logged in user session"
-      description: ""
-      operationId: "logoutUser"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters: []
+        - L1
       responses:
-        default:
-          description: "successful operation"
-  /user/{username}:
-    get:
+        '200':
+          description: Successful response. Promise (number) indicating the balance of the address.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getBalance
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - address
+                  properties:
+                    address:
+                      type: string
+                      default: yLp6ZJueuigiF4s9E1Pv8tEunDPEsjyQfd
+                      description: Dash address
+  /getBestBlockHash:
+    post:
+      operationId: getBestBlockHash
+      deprecated: false
+      summary: getBestBlockHash
+      description: Returns block hash of the chaintip
       tags:
-      - "user"
-      summary: "Get user by user name"
-      description: ""
-      operationId: "getUserByName"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - name: "username"
-        in: "path"
-        description: "The name that needs to be fetched. Use user1 for testing. "
-        required: true
-        type: "string"
+        - L1
       responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/User"
-        400:
-          description: "Invalid username supplied"
-        404:
-          description: "User not found"
-    put:
+        '200':
+          description: Successful response. Promise (string) containing the latest block hash.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+              properties:
+                method:
+                  type: string
+                  default: getBestBlockHash
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+  /getBestBlockHeight:
+    post:
+      operationId: getbestblockheight
+      deprecated: false
+      summary: getBestBlockHeight
+      description: Returns the best block height
       tags:
-      - "user"
-      summary: "Updated user"
-      description: "This can only be done by the logged in user."
-      operationId: "updateUser"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - name: "username"
-        in: "path"
-        description: "name that need to be updated"
-        required: true
-        type: "string"
-      - in: "body"
-        name: "body"
-        description: "Updated user object"
-        required: true
-        schema:
-          $ref: "#/definitions/User"
+        - L1
       responses:
-        400:
-          description: "Invalid user supplied"
-        404:
-          description: "User not found"
-    delete:
+        '200':
+          description: Successful response. Promise indicating the best seen block height.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+              properties:
+                method:
+                  type: string
+                  default: getBestBlockHeight
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+  /getBlockHash:
+    post:
+      operationId: getBlockHash
+      deprecated: false
+      summary: getBlockHash
+      description: Returns the block hash for the given height
       tags:
-      - "user"
-      summary: "Delete user"
-      description: "This can only be done by the logged in user."
-      operationId: "deleteUser"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - name: "username"
-        in: "path"
-        description: "The name that needs to be deleted"
-        required: true
-        type: "string"
+        - L1
       responses:
-        400:
-          description: "Invalid username supplied"
-        404:
-          description: "User not found"
-securityDefinitions:
-  petstore_auth:
-    type: "oauth2"
-    authorizationUrl: "http://petstore.swagger.io/oauth/dialog"
-    flow: "implicit"
-    scopes:
-      write:pets: "modify pets in your account"
-      read:pets: "read your pets"
-  api_key:
-    type: "apiKey"
-    name: "api_key"
-    in: "header"
-definitions:
-  Order:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      petId:
-        type: "integer"
-        format: "int64"
-      quantity:
-        type: "integer"
-        format: "int32"
-      shipDate:
-        type: "string"
-        format: "date-time"
-      status:
-        type: "string"
-        description: "Order Status"
-        enum:
-        - "placed"
-        - "approved"
-        - "delivered"
-      complete:
-        type: "boolean"
-        default: false
-    xml:
-      name: "Order"
-  Category:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      name:
-        type: "string"
-    xml:
-      name: "Category"
-  User:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      username:
-        type: "string"
-      firstName:
-        type: "string"
-      lastName:
-        type: "string"
-      email:
-        type: "string"
-      password:
-        type: "string"
-      phone:
-        type: "string"
-      userStatus:
-        type: "integer"
-        format: "int32"
-        description: "User Status"
-    xml:
-      name: "User"
-  Tag:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      name:
-        type: "string"
-    xml:
-      name: "Tag"
-  Pet:
-    type: "object"
-    required:
-    - "name"
-    - "photoUrls"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      category:
-        $ref: "#/definitions/Category"
-      name:
-        type: "string"
-        example: "doggie"
-      photoUrls:
-        type: "array"
-        xml:
-          name: "photoUrl"
-          wrapped: true
-        items:
-          type: "string"
+        '200':
+          description: Successful response. Promise (string) containing the requested block hash.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getBlockHash
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - height
+                  properties:
+                    height:
+                      type: integer
+                      default: 1
+                      description: Block height
+                      minimum: 0
+  /getBlockHeader:
+    post:
+      operationId: getBlockHeader
+      deprecated: false
+      summary: getBlockHeader
+      description: Returns the block header corresponding to the requested block hash
       tags:
-        type: "array"
-        xml:
-          name: "tag"
-          wrapped: true
-        items:
-          $ref: "#/definitions/Tag"
-      status:
-        type: "string"
-        description: "pet status in the store"
-        enum:
-        - "available"
-        - "pending"
-        - "sold"
-    xml:
-      name: "Pet"
-  ApiResponse:
-    type: "object"
-    properties:
-      code:
-        type: "integer"
-        format: "int32"
-      type:
-        type: "string"
-      message:
-        type: "string"
-externalDocs:
-  description: "Find out more about Swagger"
-  url: "http://swagger.io"
+        - L1
+      responses:
+        '200':
+          description: Successful response. Returns the block header corresponding to the requested block hash.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getBlockHeader
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - blockHash
+                  properties:
+                    blockHash:
+                      type: string
+                      default: '0000000000000000000000000000000000000000000000000000000000000000'
+                      description: Block hash
+  /getBlockHeaders:
+    post:
+      operationId: getBlockHeaders
+      deprecated: false
+      summary: getBlockHeaders
+      description: Returns the requested number of block headers starting at the requested height
+      tags:
+        - L1
+      responses:
+        '200':
+          description: Successful response. Promise (object array) containing an array of block headers.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getBlockHeaders
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - offset
+                    - limit
+                  properties:
+                    offset:
+                      oneOf:
+                        - type: integer
+                          description: Lowest block height to include
+                        - type: string
+                          description: Lowest block hash to include
+                    limit:
+                      type: integer
+                      default: 1
+                      description: The number of headers to return (0 < limit <=2000)
+                      minimum: 1
+                      maximum: 2000
+                    verbose:
+                      type: boolean
+                      default: false
+                      description: set true to get headers as deserialized json
+  /getBlocks:
+    post:
+      operationId: getBlocks
+      deprecated: false
+      summary: getBlocks
+      description: Returns info for blocks meeting the provided criteria
+      tags:
+        - L1
+      responses:
+        '200':
+          description: Successful response. Promise (object array) containing an array of blocks.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getBlocks
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - blockDate
+                    - limit
+                  properties:
+                    blockDate:
+                      type: string
+                      default: '2018-06-01T00:00:00.000Z'
+                      description: Starting date for blocks to get
+                    limit:
+                      type: integer
+                      default: 1
+                      description: Number of blocks to return
+                      minimum: 1
+  /getHistoricBlockchainDataSyncStatus:
+    post:
+      operationId: getHistoricBlockchainDataSyncStatus
+      deprecated: false
+      summary: getHistoricBlockchainDataSyncStatus
+      description: Returns historic blockchain data sync status
+      tags:
+        - L1
+      responses:
+        '200':
+          description: Successful response. Promise (object) containing historical sync status.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+              properties:
+                method:
+                  type: string
+                  default: getHistoricBlockchainDataSyncStatus
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+  /getMNList:
+    post:
+      operationId: getMNList
+      deprecated: false
+      summary: getMNList
+      description: Returns masternode list
+      tags:
+        - L1
+      responses:
+        '200':
+          description: Successful response. Promise (object array) containing masternode list.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+              properties:
+                method:
+                  type: string
+                  default: getMNList
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+  /getMempoolInfo:
+    post:
+      operationId: getMempoolInfo
+      deprecated: false
+      summary: getMempoolInfo
+      description: Returns mempool info object
+      tags:
+        - L1
+      responses:
+        '200':
+          description: Successful response. Promise (Object) containing info about mempool usage.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+              properties:
+                method:
+                  type: string
+                  default: getMempoolInfo
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+  /getMnListDiff:
+    post:
+      operationId: getMnListDiff
+      deprecated: false
+      summary: getMnListDiff
+      description: Returns masternode list diff for the provided block hashes
+      tags:
+        - L1
+      responses:
+        '200':
+          description: Successful response. Promise (object array) containing a diff of the masternode list based on the provided block hashes.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getMnListDiff
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - baseBlockHash
+                    - blockHash
+                  properties:
+                    baseBlockHash:
+                      type: string
+                      default: '0000000000000000000000000000000000000000000000000000000000000000'
+                      description: Block hash
+                    blockHash:
+                      type: string
+                      default: '0000000000000000000000000000000000000000000000000000000000000000'
+                      description: Block hash
+  /getPeerDataSyncStatus:
+    post:
+      operationId: getPeerDataSyncStatus
+      deprecated: false
+      summary: getPeerDataSyncStatus
+      description: Returns peer data sync status
+      tags:
+        - L1
+      responses:
+        '200':
+          description: Successful response. Promise (object) containing peer data sync status.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+              properties:
+                method:
+                  type: string
+                  default: getPeerDataSyncStatus
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+  /getQuorum:
+    post:
+      operationId: getQuorum
+      deprecated: false
+      summary: getQuorum
+      description: Returns a user quorum (LLMQ)
+      tags:
+        - L1
+      responses:
+        '200':
+          description: Successful response. Promise (object) containing a user quorum.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getQuorum
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - regTxId
+                  properties:
+                    regTxId:
+                      type: string
+                      default: '0000000000000000000000000000000000000000000000000000000000000000'
+                      description: The TXID of the user's registration subscription transaction
+  /getRawBlock:
+    post:
+      operationId: getRawBlock
+      deprecated: false
+      summary: getRawBlock
+      description: Returns the raw block for the provided block hash
+      tags:
+        - L1
+      responses:
+        '200':
+          description: Successful response. Promise (object) containing the raw block details.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getRawBlock
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - blockHash
+                  properties:
+                    blockHash:
+                      type: string
+                      default: '0000000000000000000000000000000000000000000000000000000000000000'
+                      description: Hash of the block to request
+  /getStatus:
+    post:
+      operationId: getStatus
+      deprecated: false
+      summary: getStatus
+      description: Returns status based on query parameter
+      tags:
+        - L1
+      responses:
+        '200':
+          description: Successful response. Status details for the provided query.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getStatus
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - query
+                  properties:
+                    query:
+                      type: string
+                      default: getInfo
+                      description: 'Type of status to get (getInfo, getDifficulty, getBestBlockHash, or getLastBlockHash)'
+  /getTransactionById:
+    post:
+      operationId: getTransactionById
+      deprecated: false
+      summary: getTransactionById
+      description: Returns transaction for the given hash
+      tags:
+        - L1
+      responses:
+        '200':
+          description: Successful response. Promise (object) containing transaction info.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getTransactionById
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - txid
+                  properties:
+                    txid:
+                      type: string
+                      default: '0000000000000000000000000000000000000000000000000000000000000000'
+                      description: The TXID of the transaction being requested
+  /getTransactionsByAddress:
+    post:
+      operationId: getTransactionsByAddress
+      deprecated: false
+      summary: getTransactionsByAddress
+      description: Returns all transaction related to the given address
+      tags:
+        - L1
+      responses:
+        '200':
+          description: Successful response. Promise (object) containing all transaction objects for the requested address.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getTransactionsByAddress
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - address
+                  properties:
+                    address:
+                      oneOf:
+                        - type: string
+                          description: Dash address
+                        - type: array
+                          items:
+                            type: string
+                            description: Array of Dash addresses
+                    from:
+                      type: integer
+                      description: Start of range in the ordered list of latest UTXO
+                    to:
+                      type: integer
+                      description: End of range in the ordered list of latest UTXO
+                    fromHeight:
+                      type: integer
+                      description: Lowest block height to include
+                    toHeight:
+                      type: integer
+                      description: Block height to end on
+  /getUTXO:
+    post:
+      operationId: getUTXO
+      deprecated: false
+      summary: getUTXO
+      description: Returns unspent outputs for the given address
+      tags:
+        - L1
+      responses:
+        '200':
+          description: Successful response. Promise (object) containing unspent transaction objects.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getUTXO
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - address
+                  properties:
+                    address:
+                      oneOf:
+                        - type: string
+                          description: Dash address
+                        - type: array
+                          items:
+                            type: string
+                            description: Array of Dash addresses
+                    from:
+                      type: integer
+                      description: Start of range in the ordered list of latest UTXO
+                    to:
+                      type: integer
+                      description: End of range in the ordered list of latest UTXO
+                    fromHeight:
+                      type: integer
+                      description: Lowest block height to include
+                    toHeight:
+                      type: integer
+                      description: Block height to end on
+  /getUser:
+    post:
+      operationId: getUser
+      deprecated: false
+      summary: getUser
+      description: Returns a blockchain user
+      tags:
+        - L2
+      responses:
+        '200':
+          description: Successful response. Promise (object) containing user info.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: getUser
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - username
+                  properties:
+                    username:
+                      type: string
+                      default: DashUser001
+                      description: Either a username or a user's registration tx id
+  /searchUsers:
+    post:
+      operationId: searchUsers
+      deprecated: false
+      summary: searchUsers
+      description: Adds an element to an existing bloom filter
+      tags:
+        - L2
+      responses:
+        '200':
+          description: Successful response. Promise (object with array of strings) containing the number of results returned and an array of matching users.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: searchUsers
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - pattern
+                    - limit
+                    - offset
+                  properties:
+                    pattern:
+                      type: string
+                      default: DashUser001
+                      description: Search pattern
+                    limit:
+                      type: integer
+                      default: 10
+                      description: Maximum number of results to return
+                      minimum: 1
+                      maximum: 25
+                    offset:
+                      type: integer
+                      default: 0
+                      description: Starting location in result set
+                      minimum: 0
+  /sendRawIxTransaction:
+    post:
+      operationId: sendRawIxTransaction
+      deprecated: false
+      summary: sendRawIxTransaction
+      description: Sends raw InstantSend transaction and returns the transaction ID
+      tags:
+        - L1
+      responses:
+        '200':
+          description: Successful response. Promise (string array) containing the transaction ID.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: sendRawIxTransaction
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - rawTransaction
+                  properties:
+                    rawTransaction:
+                      type: string
+                      default: ''
+                      description: Raw InstantSend transaction
+  /sendRawTransaction:
+    post:
+      operationId: sendRawTransaction
+      deprecated: false
+      summary: sendRawTransaction
+      description: Sends raw transaction and returns the transaction ID
+      tags:
+        - L1
+      responses:
+        '200':
+          description: Successful response. Promise (string array) containing the transaction ID.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: sendRawTransaction
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - rawTransaction
+                  properties:
+                    rawTransaction:
+                      type: string
+                      default: ''
+                      description: Raw transaction
+  /sendRawTransition:
+    post:
+      operationId: sendRawTransition
+      deprecated: false
+      summary: sendRawTransition
+      description: Sends raw state transition to the network
+      tags:
+        - L2
+      responses:
+        '200':
+          description: Successful response. Promise (string) containing confirmed state transition transaction.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - id
+                - jsonrpc
+                - params
+              properties:
+                method:
+                  type: string
+                  default: sendRawTransition
+                  description: Method name
+                id:
+                  type: integer
+                  default: 1
+                  format: int32
+                  description: Request ID
+                jsonrpc:
+                  type: string
+                  default: '2.0'
+                  description: JSON-RPC Version (2.0)
+                params:
+                  title: Parameters
+                  type: object
+                  required:
+                    - rawStateTransition
+                    - rawSTPacket
+                  properties:
+                    rawStateTransition:
+                      type: string
+                      default: ''
+                      description: Raw transition
+                    rawSTPacket:
+                      type: string
+                      default: ''
+                      description: Raw ST Packet
+x-send-defaults: true
+x-headers: []
+x-explorer-enabled: true
+x-proxy-enabled: true
+x-samples-enabled: true
+x-samples-languages:
+  - curl
+  - node
+  - ruby
+  - javascript
+  - python
+components: {}
+tags: []
+
