@@ -9,7 +9,7 @@ servers:
     description: User-defined network
     variables:
       url:
-        default: 'http://thephez.com'
+        default: 'http://dash.thephez.com'
       port:
         default: '3000'
 paths:
